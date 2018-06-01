@@ -20,7 +20,7 @@
 </style>
 
 <div id="form">
-  <p>Введите количество GESTS: </p>
+  <p>Введите количество GESTS</p>
   <input id="gfield" type="number">
   <button onclick="calculate()" type="submit"> 
     <span>Рассчитать</span>
@@ -37,11 +37,6 @@
   var logElement = document.createElement('p');
 
   var socket = new WebSocket("wss://ws.golos.io");
-
-  socket.onopen = function() {
-    logElement.innerHTML = 'Соединение с wss://ws.golos.io установлено';
-    logPanel.appendChild(logElement);
-  };
 
   socket.onmessage = function(event) {
     var data = JSON.parse(event.data);
@@ -63,7 +58,7 @@
         document.getElementById('output').innerHTML = 'Введите количество GESTS';
       else {
         res = totoalFund*(res/totalShares);
-        document.getElementById('output').innerHTML = res+' GOLOS';
+        document.getElementById('output').innerHTML = res.toFixed(3)+' GOLOS';
       }
     }
   };
@@ -73,6 +68,11 @@
     var gFiled = document.getElementById('gfield')
     
     //document.getElementById('output').innerHTML = '690 GOLOS';
+
+    socket.onopen = function() {
+      //logElement.innerHTML = 'Соединение с wss://ws.golos.io установлено';
+      logPanel.appendChild(logElement);
+    };
 
     socket.send(JSON.stringify({
 	jsonrpc:"2.0", 
