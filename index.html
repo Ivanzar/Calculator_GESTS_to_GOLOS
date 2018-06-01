@@ -1,0 +1,84 @@
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Перевод GESTS в GOLOS</title>
+
+<style>
+  {
+    display: block;
+  }
+
+  #form{
+     display: inline;
+  }
+
+  #log{
+    overflow: auto;
+    height: 300;
+    width: 300;
+  }
+</style>
+
+<div id="form">
+  <p>Введите количество GESTS: </p>
+  <input id="gfield" type="number">
+  <button onclick="calculate()" type="submit"> 
+    <span>Рассчитать</span>
+  </button>
+<div>
+<br>
+<div id="output"></div>
+<br>
+<div id="log"></div>
+
+<script>
+
+  var logPanel = document.getElementById('log');
+  var logElement = document.createElement('p');
+
+  var socket = new WebSocket("wss://ws.golos.io");
+
+  socket.onopen = function() {
+    logElement.innerHTML = 'Соединение с wss://ws.golos.io установлено';
+    logPanel.appendChild(logElement);
+  };
+
+  socket.onmessage = function(event) {
+    var data = JSON.parse(event.data);
+    if (data.id == 375)
+    {
+      if(typeof data.error !== 'undefined')
+      {
+        logElement = document.createElement('p')
+        logElement.innerHTML = 'Ошибка: <br> '+event.data;
+        logPanel.appendChild(logElement);
+        return;
+      }
+      
+      var totalShares = data.result.total_vesting_shares.split(' ')[0];
+      var totoalFund = data.result.total_vesting_fund_steem.split(' ')[0];
+      var res = document.getElementById('gfield').value;
+      
+      if (res.trim() == '')
+        document.getElementById('output').innerHTML = 'Введите количество GESTS';
+      else {
+        res = totoalFund*(res/totalShares);
+        document.getElementById('output').innerHTML = res+' GOLOS';
+      }
+    }
+  };
+
+  function calculate()
+  {
+    var gFiled = document.getElementById('gfield')
+    
+    //document.getElementById('output').innerHTML = '690 GOLOS';
+
+    socket.send(JSON.stringify({
+	jsonrpc:"2.0", 
+	method:"call", 
+	params:["database_api", "get_dynamic_global_properties", []], 
+	id:375}));	
+  }
+
+</script>
